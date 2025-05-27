@@ -1,0 +1,54 @@
+name: Test Build
+
+on:
+  # 允许手动触发工作流
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: '选择构建平台'
+        required: true
+        default: 'macos-latest'
+        type: choice
+        options:
+          - macos-latest
+          - windows-latest
+
+jobs:
+  test-build:
+    runs-on: ${{ github.event.inputs.platform }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Install Dependencies
+        run: npm install
+      
+      - name: Package and Make for Windows
+        if: github.event.inputs.platform == 'windows-latest'
+        run: npm run make
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Package and Make for macOS
+        if: github.event.inputs.platform == 'macos-latest'
+        run: npm run make
+        env:
+          # 测试时可以不需要签名相关的环境变量
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.inputs.platform }}-test-artifacts
+          path: |
+            out/make/**/*.exe
+            out/make/**/*.msi
+            out/make/**/*.dmg
+            out/make/**/*.zip
+          if-no-files-found: error
