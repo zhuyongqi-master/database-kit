@@ -27,7 +27,7 @@ jobs:
           node-version: 20
       
       - name: Install Dependencies
-        run: npm install
+        run: npm install --force
       
       - name: Package and Make for Windows
         if: github.event.inputs.platform == 'windows-latest'
