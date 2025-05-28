@@ -29,13 +29,13 @@ jobs:
       
       - name: Package and Make for Windows
         if: matrix.os == 'windows-latest'
-        run: npm run make
+        run: npm run make:win
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Package and Make for macOS
         if: matrix.os == 'macos-latest'
-        run: npm run make
+        run: npm run make:darwin
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}

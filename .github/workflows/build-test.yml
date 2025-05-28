@@ -31,13 +31,13 @@ jobs:
       
       - name: Package and Make for Windows
         if: github.event.inputs.platform == 'windows-latest'
-        run: npm run make
+        run: npm run make:win
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Package and Make for macOS
         if: github.event.inputs.platform == 'macos-latest'
-        run: npm run make
+        run: npm run make:darwin
         env:
           # 测试时可以不需要签名相关的环境变量
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

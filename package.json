@@ -1,9 +1,9 @@
 {
-  "name": "electron-vite-project",
+  "name": "database-kit",
   "main": "./dist-electron/main.js",
   "author": "zhuyongqi",
-  "description": "database kit",
-  "private": true,
+  "description": "tools for databases",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "debug": {
@@ -16,10 +16,11 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "start": "electron-forge start",
     "package": "rm -rf dist dist-electron && vite build && electron-forge package",
-    "make": "vite build && electron-forge make",
-    "publish": "vite build && electron-forge publish",
-    "start": "electron-forge start"
+    "make:darwin": "vite build && electron-forge make --platform=darwin --arch=arm64",
+    "make:win": "vite build && electron-forge make --platform=win32 --arch=x64",
+    "publish": "vite build && electron-forge publish"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.3",

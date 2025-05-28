@@ -1,6 +1,14 @@
 export default {
     packagerConfig: {
         asar: true,
+        arch: ['x64', 'arm64'],
+        platform: ['darwin', 'win32'],
+        overwrite: true,
+        ignore: [
+            /\/(?:build|node_modules|\.[a-z]+|yarn\.lock|package-lock\.json|README\.md|LICENSE)$/,
+            /\/(?:src|out|electron|public|.vscode|.idea|.github|.git|.DS_Store)$/,
+            /\.gitignore|\.npmrc/
+        ]
         /*osxSign: {},
         executableName: 'DatabaseKit',
         icon: './public/icon', // Path to icon without extension
@@ -16,12 +24,17 @@ export default {
     rebuildConfig: {},
     makers: [
         {
+            name: '@electron-forge/maker-zip',
+            arch: ['x64', 'arm64'],
+            platforms: ['darwin', 'win32'],
+        },
+        /*{
             name: '@electron-forge/maker-squirrel',
             config: {
-                name: 'electron-vite-project',
-                /*setupIcon: './public/icon.ico',
+                // name: 'electron-vite-project',
+                /!*setupIcon: './public/icon.ico',
                 iconUrl: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/public/icon.ico', // Replace with actual URL
-                loadingGif: './public/install-spinner.gif', */// Optional: custom spinner for the installer
+                loadingGif: './public/install-spinner.gif', *!/// Optional: custom spinner for the installer
                 setupExe: 'electron-vite-project-setup.exe',
                 noMsi: false // Set to true if you don't want to generate an MSI
             }
@@ -33,9 +46,9 @@ export default {
                 format: 'ULFO'
                 // icon: './public/icon.icns',
             }
-        }
+        }*/
     ],
-    publishers: [
+    /*publishers: [
         {
             name: '@electron-forge/publisher-github',
             config: {
@@ -47,5 +60,5 @@ export default {
                 draft: true // Create releases as drafts to review before publishing
             }
         }
-    ],
+    ],*/
 }
