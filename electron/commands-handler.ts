@@ -1,6 +1,11 @@
 import { ipcMain } from "electron";
+import { Client as ElectronSsh2Client } from "electron-ssh2";
 import { Client } from "ssh2";
 import { exec } from "child_process";
+
+// 使用require动态导入ssh2
+/*const ssh2 = import("./ssh2-wrapper.cjs");
+const client  = await ssh2.then((ssh2) => ssh2.Client);*/
 
 interface CommandExecuteResult {
   output: string;
@@ -48,7 +53,7 @@ export function setupIpcHandlers() {
 
   ipcMain.handle("execute-ssh-command-stream", async (_, command, connectionInfo?: SSHConnectionInfo) => {
     return new Promise((resolve, reject) => {
-      const conn = new Client();
+      const conn = new ElectronSsh2Client() as Client;
 
       const commandExecuteResult: CommandExecuteResult = {
         output: "",

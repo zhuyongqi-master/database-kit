@@ -18,8 +18,8 @@
     "preview": "vite preview",
     "start": "electron-forge start",
     "package": "rm -rf dist dist-electron && vite build && electron-forge package",
-    "make:darwin": "vite build && electron-forge make --platform=darwin --arch=arm64",
-    "make:win": "vite build && electron-forge make --platform=win32 --arch=x64",
+    "make:darwin": "rm -rf dist dist-electron && vite build && electron-forge make --platform=darwin --arch=arm64",
+    "make:win": "rm -rf dist dist-electron && vite build && electron-forge make --platform=win32 --arch=x64",
     "publish": "vite build && electron-forge publish"
   },
   "dependencies": {
@@ -40,6 +40,7 @@
     "@tabler/icons-react": "^3.31.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "electron-ssh2": "^0.1.2",
     "electron-store": "^10.0.1",
     "framer-motion": "^12.0.0-alpha.1",
     "i18next": "^25.2.0",
@@ -53,7 +54,6 @@
     "react-i18next": "^15.5.2",
     "react-use": "^17.5.1",
     "sonner": "^2.0.3",
-    "ssh2": "^1.16.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0"

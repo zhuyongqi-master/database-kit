@@ -12,6 +12,11 @@ export default defineConfig(({ command }) => {
   const isBuild = command === "build";
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG;
 
+  // Get all dependencies, then filter out dependencies needed in Electron
+  const dependenciesNeededInElectron = ['electron-ssh2', 'electron-store'];
+  const allDependencies = Object.keys("dependencies" in pkg ? pkg.dependencies : {});
+  const externalDependencies = allDependencies.filter(dep => !dependenciesNeededInElectron.includes(dep));
+
   return {
     build: {
       sourcemap,
@@ -53,7 +58,7 @@ export default defineConfig(({ command }) => {
               minify: isBuild,
               outDir: "dist-electron",
               rollupOptions: {
-                external: [...Object.keys("dependencies" in pkg ? pkg.dependencies : {})],
+                external: externalDependencies,
               },
             },
             resolve: {
@@ -73,7 +78,7 @@ export default defineConfig(({ command }) => {
               minify: isBuild,
               outDir: "dist-electron",
               rollupOptions: {
-                external: [...Object.keys("dependencies" in pkg ? pkg.dependencies : {})],
+                external: allDependencies,
               },
             },
             resolve: {
@@ -83,7 +88,7 @@ export default defineConfig(({ command }) => {
             },
           },
         }
-      }) as any,
+      }),
     ],
     server:
       process.env.VSCODE_DEBUG &&
