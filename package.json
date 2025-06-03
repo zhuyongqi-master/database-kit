@@ -40,7 +40,6 @@
     "@tabler/icons-react": "^3.31.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "electron-ssh2": "^0.1.2",
     "electron-store": "^10.0.1",
     "framer-motion": "^12.0.0-alpha.1",
     "i18next": "^25.2.0",
@@ -54,6 +53,7 @@
     "react-i18next": "^15.5.2",
     "react-use": "^17.5.1",
     "sonner": "^2.0.3",
+    "ssh2": "^1.16.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0"

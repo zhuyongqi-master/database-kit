@@ -300,8 +300,8 @@ const CommandDiff: React.FC = () => {
   const { t } = useTranslation();
 
   const exampleCommands = [
-    'echo "${input}"',
-    'grep "${pattern}" "${input}"',
+    'java -jar "${input}"',
+    // 'grep "${pattern}" "${input}"',
   ];
   const getPlaceholderExample = () => exampleCommands[Math.floor(Math.random() * exampleCommands.length)];
 
@@ -317,7 +317,7 @@ const CommandDiff: React.FC = () => {
           {/* Command Section */}
           <Card className="shadow-sm border-gray-200">
             <CardHeader className="py-2 px-3 border-b">
-              <CardTitle className="text-sm">{t('commandDiff.command-stream')}</CardTitle>
+              <CardTitle className="text-sm">{t('commandDiff.command')}</CardTitle>
             </CardHeader>
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
@@ -404,6 +404,7 @@ const CommandDiff: React.FC = () => {
                     styles={diffStyles}
                     compareMethod={DiffMethod.CHARS}
                     useDarkTheme={false}
+                    showDiffOnly={false}
                   />
                 </div>
               </CardContent>

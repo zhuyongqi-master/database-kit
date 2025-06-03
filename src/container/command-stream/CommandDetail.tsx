@@ -1,24 +1,12 @@
 import { Card, CardContent } from "@/components/shadcn/components/ui/card";
 import { cn } from "@/components/shadcn/lib/utils";
 import { useCommandConfigContext } from "@/context/CommandStreamContext";
-import { CheckRule, CheckRuleType, Placeholder, runCommand, Status } from "@/types/command";
+import { CheckRule, CheckRuleType, Command, CommandStream, Placeholder, runCommand, Status } from "@/types/command";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { Button } from "@shadcn/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@shadcn/components/ui/dialog";
-import {
-  AlertTriangle,
-  Check,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Circle,
-  Code,
-  Edit,
-  Loader2,
-  XCircle
-} from "lucide-react";
+import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Circle, Copy, Edit, Loader2, XCircle } from "lucide-react";
 import React, { useCallback, useEffect, useImperativeHandle, useState } from "react";
 import CheckRulesTable from "./CheckRulesTable";
 import PlaceholderTable from "./PlaceholderTable";
@@ -26,13 +14,13 @@ import {
   copyAndUpdateCheckRulerArray,
   copyAndUpdatePlaceholderArray,
   isPlaceholderValid,
+  parsePlaceholderAndType,
   replacePlaceholders,
 } from "./utils";
 import { useConnectionContext } from "@/context/ConnectionContext";
 import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@shadcn/components/ui/popover";
-import { IconDatabase } from "@tabler/icons-react";
-import { ScrollArea } from "@shadcn/components/ui/scroll-area";
+import { useToast } from "@/components/shadcn/components/ui/use-toast";
 
 interface CommandDetailRef {
   openCollapse: (isOpen: boolean) => void;
@@ -59,6 +47,7 @@ interface CommandDetailProps {
 
 function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun, ref }: CommandDetailProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { commandStreams, placeholderCompletion, updatePlaceholderCompletionAt, updateConfig } =
     useCommandConfigContext();
   const { getSelectedServer, getSelectedDatabase, selectedConnections } = useConnectionContext();
@@ -83,7 +72,7 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
   const [errorType, setErrorType] = useState<"server" | "database" | undefined>(undefined);
 
   // New state variables for check rules
-  const [isCheckRulesConfigurable, setIsCheckRulesConfigurable] = useState(true);
+  const [isCheckRulesConfigurable, setIsCheckRulesConfigurable] = useState(false);
 
   // New state for check rule validation
   const [hasCheckRuleFailures, setHasCheckRuleFailures] = useState(false);
@@ -122,6 +111,16 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
 
   const toggleCheckRulesConfigurable = () => {
     setIsCheckRulesConfigurable(!isCheckRulesConfigurable);
+  };
+
+  const copyOutputToClipboard = () => {
+    const outputText = result || t('commandStream.noOutput');
+    navigator.clipboard.writeText(outputText).then(() => {
+      toast({
+        title: t('common.success'),
+        description: t('commandStream.copySuccess')
+      });
+    });
   };
 
   // Add a validateCheckRules function
@@ -267,12 +266,14 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
   };
 
   const handleConfirmEdit = (type: "name" | "command") => {
-    const newConfig = JSON.parse(JSON.stringify(commandStreams));
+    const newConfig = JSON.parse(JSON.stringify(commandStreams)) as CommandStream[];
     if (type === "name") {
       newConfig[commandStreamIndex].commandList[commandIndex].name = editedName;
       setIsEditingName(false);
     } else {
-      newConfig[commandStreamIndex].commandList[commandIndex].commandStr = editedCommand;
+      const command: Command = newConfig[commandStreamIndex].commandList[commandIndex];
+      command.commandStr = editedCommand;
+      parsePlaceholderAndType(newConfig[commandStreamIndex], commandIndex);
       setIsEditingCommand(false);
       setShowCommandDialog(false);
     }
@@ -290,7 +291,7 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
     }
   };
 
-  const updateCommandPlaceholderCompeletion = (commandPlaceholderCompeletion: boolean[][]) =>
+  const updateCommandPlaceholderCompletion = (commandPlaceholderCompeletion: boolean[][]) =>
     updatePlaceholderCompletionAt(commandStreamIndex, commandPlaceholderCompeletion);
 
   // Add a function to get check rule status
@@ -360,17 +361,13 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
             </>
           )}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between w-full">
           <Dialog open={showCommandDialog} onOpenChange={setShowCommandDialog}>
             <DialogTrigger asChild>
-              <div className="flex-grow flex items-center cursor-pointer group">
-                <div className="text-xs text-gray-600 flex-grow truncate font-mono">{command.commandStr}</div>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100">
-                  <Code className="h-3.5 w-3.5 text-gray-500"/>
-                </Button>
-              </div>
+              <div
+                className="cursor-pointer w-[200px] max-h-[80px] flex-1 text-xs text-gray-600 overflow-hidden overflow-ellipsis font-mono">{command.commandStr}</div>
             </DialogTrigger>
-            <DialogContent aria-describedby={undefined} className="sm:max-w-[600px]">
+            <DialogContent onPointerDownOutside={() => handleCancelEdit("command")} aria-describedby={undefined} className="max-w-[min(600px,90vw)]">
               <DialogHeader>
                 <DialogTitle>{isEditingCommand ? t('commandStream.editCommand') : t('commandStream.command')}</DialogTitle>
               </DialogHeader>
@@ -408,7 +405,7 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
               )}
             </DialogContent>
           </Dialog>
-          <Button variant="ghost" size="sm" onClick={handleEditCommand} className="h-6 w-6 p-0">
+          <Button variant="ghost" size="sm" onClick={handleEditCommand} className="flex-shrink-0 h-6 w-6 p-0">
             <Edit className="h-3.5 w-3.5 text-gray-500"/>
           </Button>
         </div>
@@ -451,7 +448,7 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
               commandIndex={commandIndex}
               configIndex={0}
               commandPlaceholderCompletion={placeholderCompletion[commandStreamIndex]}
-              updatePlaceholderCompletion={updateCommandPlaceholderCompeletion}
+              updatePlaceholderCompletion={updateCommandPlaceholderCompletion}
               savePlaceholders={savePlaceholders}
             />
           </CollapsibleContent>
@@ -522,24 +519,10 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
           </PopoverTrigger>
           <PopoverContent className="w-[300px] p-0 bg-white border shadow-md" align="end" side="top">
             <div className="bg-secondary p-2 rounded-md">
-              <h3 className="text-sm font-semibold">{realCommand()}</h3>
+              <h3 className="text-xs">{realCommand()}</h3>
             </div>
           </PopoverContent>
         </Popover>
-        {/*<TooltipProvider delayDuration={500}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="h-6 text-xs px-2">
-                {t('commandStream.preview')}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" align="end" className="w-[300px] p-0">
-              <div className="bg-secondary p-2 rounded-md">
-                <h3 className="text-sm font-semibold">{realCommand()}</h3>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>*/}
 
         {/* Run confirmation dialog */}
         <Dialog open={showConfirmRunDialog} onOpenChange={setShowConfirmRunDialog}>
@@ -588,13 +571,13 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
               </div>
             </div>
             <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowConfirmRunDialog(false)}>
-                    {t('common.cancel')}
-                  </Button>
-                  <Button onClick={handleRun}>
-                    {t('commandStream.runCommand')}
-                  </Button>
-                </DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfirmRunDialog(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={handleRun}>
+                {t('commandStream.runCommand')}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -619,8 +602,13 @@ function CommandDetail({ commandStreamIndex, commandIndex, status, result, onRun
               <DialogTitle>{t('commandStream.commandExecutionResult')}</DialogTitle>
             </DialogHeader>
             {renderCheckRuleStatus()}
-            <div className="font-mono text-sm p-3 border rounded-md bg-gray-50 whitespace-pre-wrap">
-              {result || t('commandStream.noOutput')}
+            <div className="relative">
+              <div className="font-mono text-sm p-3 border rounded-md bg-gray-50 whitespace-pre-wrap pr-10">
+                {result || t('commandStream.noOutput')}
+              </div>
+              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={copyOutputToClipboard}>
+                <Copy size={16}/>
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

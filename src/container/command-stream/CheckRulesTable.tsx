@@ -28,14 +28,14 @@ function CheckRulesTable({
                            saveCheckRules,
                          }: CheckRulesTableProps) {
   const { t } = useTranslation();
-  const checkRules = commandStream.checkRuleConfigs?.[0].commandStreamCheckRule[commandIndex] || ([] as CheckRule[]);
+  const checkRules = commandStream.checkRuleConfigs?.[0]?.commandStreamCheckRule[commandIndex] || [];
 
   const [newRuleName, setNewRuleName] = useState("");
   const [newRuleType, setNewRuleType] = useState<CheckRuleType>(CheckRuleType.StringEqual);
   const [newRuleValue, setNewRuleValue] = useState("");
 
   const addCheckRule = () => {
-    if (!newRuleName.trim() || !newRuleValue.trim()) return;
+    if (!newRuleName.trim()) return;
 
     const newRule: CheckRule = {
       name: newRuleName,
@@ -99,7 +99,7 @@ function CheckRulesTable({
 
       <div className="py-1">
         {checkRules.length === 0 ? (
-          <p className="text-xs text-gray-500 py-1">{t('commandStream.noRules')}</p>
+          <p className="text-center text-xs text-gray-500 py-1">{t('commandStream.noRules')}</p>
         ) : (
           <div className="space-y-1">
             {checkRules.map((rule, index) => (
@@ -209,7 +209,7 @@ function CheckRulesTable({
                 variant="ghost"
                 size="sm"
                 onClick={addCheckRule}
-                disabled={!newRuleName.trim() || !newRuleValue.trim()}
+                disabled={!newRuleName.trim()}
                 className="h-7 w-7 p-0"
               >
                 <Plus className="h-4 w-4"/>

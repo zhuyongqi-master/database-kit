@@ -104,12 +104,27 @@ const DBConfigManager: React.FC = () => {
   // Handlers for server selection
   const handleServerSelect = (serverId: string | null) => {
     if (serverId === 'manual') {
-      setManualServerModalOpen(true);
+      setSelectedServerId('manual');
+      setIsUsingManualServer(true);
+      setIsUsingLocalMode(false);
+      setSelectedServer(null);
+      // Update settings
+      updateSettings({
+        selectedServerId: 'manual',
+        isUsingLocalMode: false,
+        isUsingManualServer: true,
+        manualServerConfig: manualServerConfig
+      });
+      setManualServerConfig(state.settings.manualServerConfig);
+      return;
+
+      // Otherwise, open modal for configuration
+      // setManualServerModalOpen(true);
       // Initialize manual server config from settings if available
-      if (state.settings.manualServerConfig) {
+      /*if (state.settings.manualServerConfig) {
         setManualServerConfig(state.settings.manualServerConfig);
       }
-      return;
+      return;*/
     }
 
     if (serverId === 'local') {
@@ -232,9 +247,9 @@ const DBConfigManager: React.FC = () => {
 
   // Handler for fetching the config file
   const handleFetchConfig = async () => {
-    if (!isUsingLocalMode && !state.selectedServer) {
+    if ((!isUsingLocalMode && !isUsingManualServer) && !state.selectedServer) {
       toast.error("Error", {
-        description: t('dbConfigManager.selectServerError'),
+        description: t('dbConfigManager.selectServerError')
       });
       return;
     }
@@ -255,6 +270,8 @@ const DBConfigManager: React.FC = () => {
         result = await fetchLocalConfigFile(filePath);
       } else if (state.selectedServer) {
         result = await fetchConfigFile(filePath, state.selectedServer);
+      } else if (isUsingManualServer) {
+        result = await fetchConfigFile(filePath, manualServerConfig);
       } else {
         // This should never happen due to the check above
         setLoading(false);
@@ -264,7 +281,7 @@ const DBConfigManager: React.FC = () => {
       if (!result.success) {
         setError(`Failed to fetch config file: ${result.output}`);
         toast.error("Error", {
-          description: t('dbConfigManager.fetchFailure', { output: result.output }),
+          description: t('dbConfigManager.fetchConfigError', { error: result.output }),
         });
         return;
       }
@@ -489,7 +506,7 @@ const DBConfigManager: React.FC = () => {
                     <div className="mt-2 border-t pt-2">
                       <div
                         className="flex items-center rounded-md px-3 py-2 text-sm cursor-pointer hover:bg-slate-100"
-                        onClick={() => handleServerSelect('manual')}
+                        onClick={() => setManualServerModalOpen(true)}
                       >
                         <span className="text-blue-600">{t('dbConfigManager.enterServerManually')}</span>
                       </div>
@@ -516,11 +533,11 @@ const DBConfigManager: React.FC = () => {
             </Button>
           </div>
           <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-2">
-            {(isUsingLocalMode || state.selectedServer) && (
+            {
               <p className="text-xs text-muted-foreground">
                 {t('dbConfigManager.using')} {getServerDisplayName()}
               </p>
-            )}
+            }
             <Button
               variant="ghost"
               size="sm"
@@ -801,7 +818,7 @@ const DBConfigManager: React.FC = () => {
               handleServerSelect('manual');
               setManualServerModalOpen(false);
             }}>
-              {t('dbConfigManager.connect')}
+              {t('common.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

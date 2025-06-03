@@ -1,4 +1,4 @@
-import { executeCommand, mockExecuteCommand } from "@/api/command-ssh";
+import { executeCommand, executeCommandBatch } from "@/api/command-ssh";
 import { Button } from "@/components/shadcn/components/ui/button";
 import { DialogFooter, DialogHeader } from "@/components/shadcn/components/ui/dialog";
 import { ScrollArea } from "@/components/shadcn/components/ui/scroll-area";
@@ -14,6 +14,7 @@ import { replacePlaceholders } from "./utils";
 import { useConnectionContext } from "@/context/ConnectionContext";
 import { isEmptyOrInvalidArray } from "@/lib/utils";
 import { ConnectionInfo } from "@/types/connection";
+import { v4 as uuid } from "uuid";
 
 interface CommandStreamControlPanelProps {
   commandStreamIndex: number;
@@ -59,7 +60,7 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
     if (!commandStream || !commandStates) return;
     return replacePlaceholders(commandStream.commandList[index],
       commandStreams[commandStreamIndex]?.placeholderConfigs[0]?.commandStreamPlaceholderValues[index],
-      (index > 0 ? commandStates[index - 1].output : undefined), selectedServer, selectedDatabase
+      (index > 0 ? commandStates[index - 1]?.output : undefined), selectedServer, selectedDatabase
     );
   };
 
@@ -91,7 +92,7 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
 
       executeCommand(commandToRun, connectionInfo)
         .then((result: CommandExecuteResult) => {
-          currentCommandState.output = result.output;
+          currentCommandState.output = result.output && result.output.trim();
           if (result.success) {
             currentCommandState.state = Status.Success;
           } else {
@@ -140,6 +141,12 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
       return;
     }
 
+    const serverConnection = getSelectedServer();
+    if (!serverConnection) {
+      setError(t('commandStream.selectServerNotFound'));
+      return;
+    }
+
     if (needsDatabase && !selectedConnections.database) {
       setError(t('commandStream.selectDatabase'));
       return;
@@ -156,11 +163,12 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
       return;
     }
 
-    // run each command-stream and check its result
+    // run each command-stream and check its resultZ
     if (!commandStream?.commandList.length) return;
     setIsGlobalRunning(true);
 
     let currentCommandStates = commandStates;
+    const connectionId = uuid();
     for (let i = startIndex; i < commandStream.commandList.length; i++) {
       // Update the current command-stream index
       setCurrentExecuteIndex(i);
@@ -194,28 +202,27 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
       );
       try {
         // Get server connection info if available for the real execution
-        /*const serverConnection = getSelectedServer();
-        const connectionInfo = serverConnection ? {
+        const connectionInfo = {
           host: serverConnection.ip,
           port: serverConnection.port,
           username: serverConnection.username,
           password: serverConnection.password
-        } : undefined;
+        };
 
         // Use the actual executeCommand with connection info
-        const result = await executeCommand(realCommand, connectionInfo);*/
+        const result = await executeCommandBatch(realCommand, connectionInfo, i === commandStream.commandList.length - 1, connectionId);
 
         // For testing, still using mockExecuteCommand
-        const result = await mockExecuteCommand(realCommand);
+        // const result = await mockExecuteCommand(realCommand);
 
-        currentCommandState.output = result.output;
+        currentCommandState.output = result.output && result.output.trim();
         if (result.success) {
           currentCommandState.state = Status.Success;
 
           // Validate against check rules
           const commandDetailRef = commandDetailRefs.current[i];
           if (commandDetailRef) {
-            const { hasFailed } = commandDetailRef.validateCheckRules(result.output);
+            const { hasFailed } = commandDetailRef.validateCheckRules(currentCommandState.output);
 
             // If check rules fail, update the state accordingly
             if (hasFailed) {
@@ -294,19 +301,22 @@ export default function CommandStreamControlPanel({ commandStreamIndex }: Comman
         </div>
         <ScrollArea>
           <div className="space-y-4 p-4">
-            {commandStream?.commandList.map((_, index) => (
-              <CommandDetail
-                key={index}
-                commandStreamIndex={commandStreamIndex}
-                commandIndex={index}
-                status={commandStates[index].state}
-                result={commandStates[index].output}
-                onRun={handleRun(index)}
-                ref={(el) => {
-                  commandDetailRefs.current[index] = el;
-                }}
-              />
-            ))}
+            {(commandStream?.commandList && commandStream.commandList.length > 0) &&
+              (
+                commandStream.commandList.map((_, index) => (
+                  <CommandDetail
+                    key={index}
+                    commandStreamIndex={commandStreamIndex}
+                    commandIndex={index}
+                    status={commandStates[index].state}
+                    result={commandStates[index].output}
+                    onRun={handleRun(index)}
+                    ref={(el) => {
+                      commandDetailRefs.current[index] = el;
+                    }}
+                  />
+                ))
+              )}
           </div>
         </ScrollArea>
       </div>

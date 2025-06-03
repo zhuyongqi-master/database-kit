@@ -176,6 +176,7 @@ function dbConfigReducer(state: DBConfigState, action: DBConfigAction): DBConfig
           // Revert to the original state
           return {
             ...item,
+            value: modifiedItem.originalValue,
             isModified: false
           };
         }

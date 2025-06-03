@@ -37,11 +37,11 @@ function PlaceholderTable({
     const match = placeholder.match(/\$\{([^}]+)}/);
     return {
       key: match ? match[1] : placeholder,
-      value: currentPlaceholderConfig.commandStreamPlaceholderValues[commandIndex]?.[index]?.value ?? "",
+      value: currentPlaceholderConfig?.commandStreamPlaceholderValues[commandIndex]?.[index]?.value ?? "",
     };
   });
   const [placeholders, { updateAt: updatePlaceholderAt }] = useList<Placeholder>(
-    commandStream.placeholderConfigs[configIndex].commandStreamPlaceholderValues[commandIndex]
+    commandStream.placeholderConfigs[configIndex]?.commandStreamPlaceholderValues[commandIndex] ?? [],
   );
 
   const handConfigFinished = () => savePlaceholders(placeholders);
@@ -56,8 +56,8 @@ function PlaceholderTable({
       header: t('commandStream.value'),
       cell: (_, rowIndex, isConfigurable) => {
         const placeholder = placeholders[rowIndex];
-        const placeholderType = placeholder.type;
-        const placeholderValue = placeholder.value;
+        const placeholderType = placeholder?.type ?? PlaceholderType.Plain;
+        const placeholderValue = placeholder?.value ?? "";
         const valid = commandPlaceholderCompletion[commandIndex][rowIndex];
 
         const onPlaceholderTypeChange = (type: PlaceholderType): void => {
@@ -173,7 +173,8 @@ function PlaceholderTable({
     },
   ];
 
-  return <DataTable title={t('commandStream.parameters')} columns={columns} rows={rows} onConfigFinished={handConfigFinished}/>;
+  return <DataTable title={t('commandStream.parameters')} columns={columns} rows={rows}
+                    onConfigFinished={handConfigFinished}/>;
 }
 
 export default PlaceholderTable;

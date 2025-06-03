@@ -42,10 +42,12 @@ function createWindow() {
   });
 
   if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL).then(() => {});
+    win.loadURL(VITE_DEV_SERVER_URL).then(() => {
+    });
     win.webContents.openDevTools();
   } else {
-    win.loadFile(path.join(RENDERER_DIST, 'index.html')).then(() => {});
+    win.loadFile(path.join(RENDERER_DIST, 'index.html')).then(() => {
+    });
   }
 }
 

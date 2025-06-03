@@ -18,7 +18,7 @@ import { cn } from "@/components/shadcn/lib/utils";
 import { useCommandConfigContext } from "@/context/CommandStreamContext";
 import { CommandStream } from "@/types/command";
 import { Description } from "@radix-ui/react-dialog";
-import { Copy, FileTerminal, MoreVertical, Plus } from "lucide-react";
+import { Copy, FileTerminal, MoreVertical, Plus, Edit } from "lucide-react";
 import React, { Fragment, useState } from "react";
 import { useToast } from "@/components/shadcn/components/ui/use-toast";
 import { useTranslation } from "react-i18next";
@@ -31,11 +31,14 @@ export interface CommandStreamSidebarProps {
 const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCommand, selectedIndex }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { commandStreams, updateConfig, deleteCommandStream } = useCommandConfigContext();
+  const { commandStreams, updateConfig, deleteCommandStream, renameCommandStream } = useCommandConfigContext();
   const [jsonInput, setJsonInput] = useState("");
   const [exportJson, setExportJson] = useState("");
   const [newStreamName, setNewStreamName] = useState("");
+  const [renameStreamName, setRenameStreamName] = useState("");
+  const [renameStreamIndex, setRenameStreamIndex] = useState(-1);
   const [openNameDialog, setOpenNameDialog] = useState(false);
+  const [openRenameDialog, setOpenRenameDialog] = useState(false);
   const [openImportDialog, setOpenImportDialog] = useState(false);
   const [openExportDialog, setOpenExportDialog] = useState(false);
 
@@ -57,8 +60,14 @@ const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCom
     const emptyCommandStream: CommandStream = {
       name: newStreamName.trim(),
       commandList: [],
-      placeholderConfigs: [],
-      checkRuleConfigs: [],
+      placeholderConfigs: [{
+        name: "default",
+        commandStreamPlaceholderValues: []
+      }],
+      checkRuleConfigs: [{
+        name: "default",
+        commandStreamCheckRule: []
+      }],
     };
 
     // Update command-stream streams - state updates will be handled in updateConfig
@@ -119,6 +128,30 @@ const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCom
     toast({
       title: t('common.success'),
       description: t('commandStream.copySuccess')
+    });
+  };
+
+  const handleRenameCommandStream = (index: number) => {
+    setRenameStreamIndex(index);
+    setRenameStreamName(commandStreams[index].name);
+    setOpenRenameDialog(true);
+  };
+
+  const handleConfirmRename = () => {
+    if (!renameStreamName.trim()) {
+      toast({
+        title: t('common.error'),
+        description: t('commandStream.enterName'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    renameCommandStream(renameStreamIndex, renameStreamName.trim());
+    setOpenRenameDialog(false);
+    toast({
+      title: t('common.success'),
+      description: t('commandStream.renameSuccess')
     });
   };
 
@@ -198,12 +231,38 @@ const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCom
           </DialogContent>
         </Dialog>
 
+        <Dialog open={openRenameDialog} onOpenChange={setOpenRenameDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('commandStream.renameCommandStream')}</DialogTitle>
+            </DialogHeader>
+            <div className="py-2">
+              <label htmlFor="renameStreamName" className="text-sm font-medium block mb-2">
+                {t('commandStream.streamName')}
+              </label>
+              <input
+                id="renameStreamName"
+                type="text"
+                value={renameStreamName}
+                onChange={(e) => setRenameStreamName(e.target.value)}
+                className="w-full border p-2 rounded"
+                placeholder={t('commandStream.enterName')}
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="mt-4">
+              <Button onClick={handleConfirmRename}>{t('common.rename')}</Button>
+            </DialogFooter>
+            <Description/>
+          </DialogContent>
+        </Dialog>
+
         <div className="space-y-1">
           {commandStreams.map((commandStream, index) => (
             <Fragment key={index}>
               <div
                 className={cn(
-                  "flex items-center justify-between rounded-md hover:bg-gray-200 py-2 px-2",
+                  "w-[150px] flex items-center justify-between rounded-md hover:bg-gray-200 py-2 px-2",
                   selectedIndex === index && "bg-gray-200"
                 )}
               >
@@ -212,8 +271,8 @@ const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCom
                   className="flex-grow flex items-center gap-2 text-left text-sm overflow-hidden"
                   onClick={() => onSelectCommand(index)}
                 >
-                  <FileTerminal size={18} className="text-gray-600 flex-shrink-0"/>
-                  <span className="font-medium truncate">{commandStream.name}</span>
+                  <FileTerminal size={15} className="text-gray-600 flex-shrink-0"/>
+                  <span className="text-xs overflow-hidden overflow-ellipsis">{commandStream.name}</span>
                 </button>
 
                 <DropdownMenu>
@@ -223,11 +282,14 @@ const CommandStreamSidebar: React.FC<CommandStreamSidebarProps> = ({ onSelectCom
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleDeleteCommandStream(index)} className="text-red-500">
-                      {t('common.delete')}
+                    <DropdownMenuItem onClick={() => handleRenameCommandStream(index)}>
+                      {t('common.rename')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleExportCommandStream(index)}>
                       {t('commandStream.exportAsJson')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDeleteCommandStream(index)} className="text-red-500">
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

@@ -45,7 +45,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const data = {
     user: {
       name: "zhuyongqi",
-      email: "github.com/zhuyongqi-master",
+      email: "github.com/zhuyongqi-master/database-kit",
       avatar: "/avatars/shadcn.jpg",
     },
     sections: [
@@ -113,7 +113,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{data.user.name}</span>
-            <span className="truncate text-xs">{data.user.email}</span>
+            <span className="truncate text-xs hover:overflow-visible">{data.user.email}</span>
           </div>
         </div>
       </SidebarFooter>

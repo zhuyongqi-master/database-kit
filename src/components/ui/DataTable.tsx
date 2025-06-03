@@ -2,6 +2,7 @@ import { Button } from "@shadcn/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@shadcn/components/ui/table";
 import { Edit, Lock } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface Row {
   key: string;
@@ -21,6 +22,7 @@ interface DataTableProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
 }
 
 export default function DataTable({ title, columns, rows, onConfigFinished, className, ...props }: DataTableProps) {
+  const { t } = useTranslation();
   const [isConfigurable, setIsConfigurable] = useState(false);
 
   const toggleConfigurable = () => {
@@ -31,7 +33,12 @@ export default function DataTable({ title, columns, rows, onConfigFinished, clas
   };
 
   return (
-    <div className={`w-full mx-auto ${className || ""}`} {...props}>
+    rows.length === 0 ? (
+      <div className="w-full mx-auto text-center text-xs text-gray-500">
+        {t('commandStream.noPlaceholders')}
+      </div>
+    ) :
+    (<div className={`w-full mx-auto ${className || ""}`} {...props}>
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-xs font-medium">{title}</h2>
         <Button
@@ -84,6 +91,6 @@ export default function DataTable({ title, columns, rows, onConfigFinished, clas
           </TableBody>
         </Table>
       </div>
-    </div>
+    </div>)
   );
 }

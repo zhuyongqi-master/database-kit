@@ -25,6 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger, } from "@/components/shadcn/co
 import { useConnectionContext } from "@/context/ConnectionContext";
 import { IconDatabase, IconServer } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import { parsePlaceholder } from "@/container/command-stream/utils";
 
 interface GlobalControlToolBarProps {
   isRunning: boolean;
@@ -98,9 +99,9 @@ const CommandEntryItem = ({
       onDragOver={(e) => onDragOver(e, index)}
       onDrop={() => onDrop(index)}
     >
-      <div className="flex-1">
+      <div className="flex-1 w-full">
         <div className="font-medium text-sm">{entry.name}</div>
-        <div className="text-xs text-gray-500 font-mono truncate">{entry.command}</div>
+        <div className="w-[380px] text-xs text-gray-500 font-mono truncate">{entry.command}</div>
       </div>
       <div className="flex gap-1">
         <Button
@@ -564,24 +565,12 @@ function GlobalControlToolBar({
 
   const handleAddCommand = (newCommandName: string, newCommandStr: string, index: number) => {
     if (!newCommandName.trim() || !newCommandStr.trim() || index === null) return;
-
     const newCommand: Command = {
       name: newCommandName.trim(),
       commandStr: newCommandStr.trim(),
       placeholderKeys: [],
     };
-
-    // Extract placeholder keys from command-stream string
-    const placeholderRegex = /\${([^}]+)}/g;
-    let match;
-    const placeholders = new Set<string>();
-
-    while ((match = placeholderRegex.exec(newCommandStr)) !== null) {
-      placeholders.add(match[1]);
-    }
-
-    newCommand.placeholderKeys = Array.from(placeholders);
-
+    newCommand.placeholderKeys = parsePlaceholder(newCommand);
     addCommand(commandStreamIndex, index, newCommand);
   };
 

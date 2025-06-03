@@ -9,7 +9,7 @@ import DBConfigManagerWrapper from "@/container/db-config-manager";
 import { Toaster } from "sonner";
 import { DBConfigProvider } from "@/context/DBConfigContext";
 import { ConnectionProvider } from "@/context/ConnectionContext";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CommandStreamProvider } from "@/context/CommandStreamContext";
 import { SQLCommandProvider } from "@/context/SQLCommandContext";
 import LanguageSwitcher from "./components/LanguageSwitcher";

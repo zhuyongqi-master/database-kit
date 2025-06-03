@@ -14,6 +14,15 @@ export async function executeCommand(
   return window.ipcRenderer.invoke("execute-ssh-command-stream", commandToRun, connectionInfo);
 }
 
+export async function executeCommandBatch(
+  commandToRun: string,
+  connectionInfo: SSHConnectionInfo,
+  close: boolean = true,
+  uuid: string
+): Promise<CommandExecuteResult> {
+  return window.ipcRenderer.invoke("execute-ssh-command-batch", commandToRun, connectionInfo, close, uuid);
+}
+
 export async function mockExecuteCommand(commandToRun: string): Promise<CommandExecuteResult> {
   return new Promise<CommandExecuteResult>((resolve) => {
     setTimeout(() => {

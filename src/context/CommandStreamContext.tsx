@@ -15,6 +15,7 @@ interface CommandConfigContextProp {
   deleteCommand: (streamIndex: number, commandIndex: number) => void;
   reorderCommands: (streamIndex: number, oldIndex: number, newIndex: number) => void;
   deleteCommandStream: (streamIndex: number) => void;
+  renameCommandStream: (streamIndex: number, newName: string) => void;
 }
 
 const CommandConfigContext = createContext<CommandConfigContextProp | undefined>(undefined);
@@ -174,6 +175,9 @@ export function CommandStreamProvider({ children }: { children: ReactNode }) {
     // Create a new array without the stream to delete
     const newCommandStreams = commandStreams.filter((_, index) => index !== streamIndex);
 
+    // config should be updated before commandStates, otherwise cannot find its commandstate while re-render
+    await updateConfig(newCommandStreams);
+
     // Update command-stream states
     const newCommandStates = [...commandStates];
     newCommandStates.splice(streamIndex, 1);
@@ -183,9 +187,6 @@ export function CommandStreamProvider({ children }: { children: ReactNode }) {
     const newPlaceholderCompletion = [...placeholderCompletion];
     newPlaceholderCompletion.splice(streamIndex, 1);
     setPlaceholderCompletion(newPlaceholderCompletion);
-
-    // Update the config with the new streams
-    await updateConfig(newCommandStreams);
   };
 
   const reorderCommands = async (streamIndex: number, oldIndex: number, newIndex: number) => {
@@ -222,6 +223,12 @@ export function CommandStreamProvider({ children }: { children: ReactNode }) {
     setPlaceholderCompletion(newPlaceholderCompletion);
   };
 
+  const renameCommandStream = async (streamIndex: number, newName: string) => {
+    const newCommandStreams = [...commandStreams];
+    newCommandStreams[streamIndex].name = newName;
+    await updateConfig(newCommandStreams);
+  };
+
   return (
     <CommandConfigContext.Provider
       value={{
@@ -234,7 +241,8 @@ export function CommandStreamProvider({ children }: { children: ReactNode }) {
         addCommand,
         deleteCommand,
         reorderCommands,
-        deleteCommandStream
+        deleteCommandStream,
+        renameCommandStream
       }}
     >
       {children}

@@ -64,6 +64,7 @@ declare module 'react-i18next' {
           currentRules: string;
           save: string;
           edit: string;
+          newRule: string;
           noRules: string;
           ruleName: string;
           selectType: string;

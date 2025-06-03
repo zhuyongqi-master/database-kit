@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => {
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG;
 
   // Get all dependencies, then filter out dependencies needed in Electron
-  const dependenciesNeededInElectron = ['electron-ssh2', 'electron-store'];
+  const dependenciesNeededInElectron = ['electron-store'];
   const allDependencies = Object.keys("dependencies" in pkg ? pkg.dependencies : {});
   const externalDependencies = allDependencies.filter(dep => !dependenciesNeededInElectron.includes(dep));
 
@@ -40,6 +40,35 @@ export default defineConfig(({ command }) => {
           ],
         },
       }),
+      {
+        name: 'build-ssh2-wrapper',
+        closeBundle: async () => {
+          if (isBuild) {
+            const { build } = await import('vite');
+            await build({
+              configFile: false,
+              build: {
+                lib: {
+                  entry: path.join(__dirname, 'electron/ssh2-wrapper.cjs'),
+                  name: 'ssh2Wrapper',
+                  fileName: 'ssh2-wrapper',
+                  formats: ['cjs']
+                },
+                outDir: path.join(__dirname, 'dist-electron'),
+                rollupOptions: {
+                  external: ['crypto', 'fs', 'path', 'util', 'stream', 'events', 'buffer', 'net', 'tls', 'zlib', 'os', 'child_process', 'http', 'https', 'assert'],
+                  output: {
+                    format: 'cjs',
+                    exports: 'auto'
+                  }
+                },
+                minify: true,
+                emptyOutDir: false
+              }
+            });
+          }
+        }
+      },
       electron({
         main: {
           // Shortcut of `build.lib.entry`
@@ -58,7 +87,7 @@ export default defineConfig(({ command }) => {
               minify: isBuild,
               outDir: "dist-electron",
               rollupOptions: {
-                external: externalDependencies,
+                external: isBuild ? [...externalDependencies, './ssh2-wrapper.cjs'] : [...externalDependencies]
               },
             },
             resolve: {

@@ -11,7 +11,7 @@ interface SSHConnectionInfo {
 }
 
 // Convert ConnectionInfo to the format needed for SSH connection
-function mapConnectionToSSH(connection: ConnectionInfo): SSHConnectionInfo {
+function mapConnectionToSSH(connection: ConnectionInfo | Pick<ConnectionInfo, "ip" | "port" | "username" | "password">): SSHConnectionInfo {
   return {
     host: connection.ip,
     port: connection.port,
@@ -27,7 +27,7 @@ async function executeLocalCommand(command: string): Promise<CommandExecuteResul
 
 export async function fetchConfigFile(
   filePath: string,
-  connectionInfo: ConnectionInfo
+  connectionInfo: ConnectionInfo | Pick<ConnectionInfo, "ip" | "port" | "username" | "password">
 ): Promise<CommandExecuteResult> {
   const command = `cat ${filePath}`;
   return executeCommand(command, mapConnectionToSSH(connectionInfo));
@@ -74,6 +74,7 @@ export function parseConfigFile(content: string): ParsedConfig {
         items.push({
           key,
           value,
+          originalValue: value,
           lineNumber,
           originalContent: line,
           isModified: false

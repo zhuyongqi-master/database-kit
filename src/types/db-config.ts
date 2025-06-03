@@ -2,6 +2,7 @@ export interface DBConfigItem {
   key: string;
   value: string;
   lineNumber: number;
+  originalValue: string;
   originalContent: string;
   isModified: boolean;
 }
