@@ -275,8 +275,8 @@ export default function SQLCommandManagement() {
           </div>
         </div>
         <Separator className="shadow-sm"/>
-        <ul className="no-scrollbar grid gap-4 overflow-auto pt-4 pb-16" style={{
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
+        <ul className="grid gap-4 overflow-auto pt-4 pb-16" style={{
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
         }}>
           {filteredSQLCommands.length > 0 ? (
             filteredSQLCommands.map((sqlCommand) => (

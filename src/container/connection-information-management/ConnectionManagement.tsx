@@ -230,7 +230,7 @@ export default function ConnectionManagement() {
         </div>
         <Separator className="shadow-sm"/>
         <ul className="no-scrollbar grid gap-4 overflow-auto pt-4 pb-16" style={{
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 160px), 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
         }}>
           {filteredConnections?.length > 0 ? (
               filteredConnections.map((connection) => (
