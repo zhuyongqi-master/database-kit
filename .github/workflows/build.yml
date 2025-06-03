@@ -48,17 +48,18 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-artifacts
+          name: ${{ matrix.os }}-artifacts  # 改为动态名称
           path: |
             out/make/**/*.exe
             out/make/**/*.msi
+            out/make/**/*.zip
           if-no-files-found: error
 
       - name: Upload macOS Artifacts
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: macos-artifacts
+          name: ${{ matrix.os }}-artifacts  # 改为动态名称
           path: |
             out/make/**/*.dmg
             out/make/**/*.zip
@@ -75,19 +76,23 @@ jobs:
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-artifacts
+          name: windows-latest-artifacts  # 与上传时的名称一致
           path: artifacts/windows
 
       - name: Download macOS Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: macos-artifacts
+          name: macos-latest-artifacts    # 与上传时的名称一致
           path: artifacts/macos
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**/*.zip
+          files: |
+            out/make/**/*.exe
+            out/make/**/*.msi
+            out/make/**/*.zip
+            out/make/**/*.dmg
           draft: true
           prerelease: false
           generate_release_notes: true
