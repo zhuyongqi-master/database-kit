@@ -56,7 +56,7 @@ export default defineConfig(({ command }) => {
                 },
                 outDir: path.join(__dirname, 'dist-electron'),
                 rollupOptions: {
-                  external: ['crypto', 'fs', 'path', 'util', 'stream', 'events', 'buffer', 'net', 'tls', 'zlib', 'os', 'child_process', 'http', 'https', 'assert'],
+                  external: ['crypto', 'fs', 'path', 'util', 'stream', 'events', 'buffer', 'net', 'tls', 'zlib', 'os', 'child_process', 'http', 'https', 'assert', /(cpu-features|sshcrypto\.node)/],
                   output: {
                     format: 'cjs',
                     exports: 'auto'
