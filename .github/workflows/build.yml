@@ -88,9 +88,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/**/*.exe
-            artifacts/**/*.msi
-            artifacts/**/*.dmg
             artifacts/**/*.zip
           draft: true
           prerelease: false
