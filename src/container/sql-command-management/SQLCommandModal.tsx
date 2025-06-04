@@ -37,12 +37,12 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
 
   const isEditing = !!sqlCommandId;
 
-  // Load SQL command-stream data if editing
+  // Load SQL command data if editing
   useEffect(() => {
     if (sqlCommandId) {
       const command = getSQLCommand(sqlCommandId);
       if (command) {
-        // Check if it's an SQL command-stream (has databaseType)
+        // Check if it's an SQL command (has databaseType)
         if ('databaseType' in command) {
           const sqlCommand = command as SQLCommand;
           setFormData({
@@ -53,7 +53,7 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
           });
           setTempSqlOrCommandType('sql');
         } else {
-          // It's a regular command-stream
+          // It's a regular command
           const regularCommand = command as Command;
           setFormData({
             name: regularCommand.name,
@@ -65,7 +65,7 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
         }
       }
     } else {
-      // Reset form when adding a new SQL command-stream
+      // Reset form when adding a new SQL command
       setFormData({
         name: '',
         databaseType: 'PostgreSQL',
@@ -84,7 +84,7 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
     e.preventDefault();
 
     if (tempSqlOrCommandType === 'sql') {
-      // Handle SQL command-stream with database type
+      // Handle SQL command with database type
       const sqlCommandData: Partial<SQLCommand> = {
         name: formData.name,
         databaseType: formData.databaseType,
@@ -96,7 +96,7 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
         updateSQLCommand('sql', sqlCommandId, sqlCommandData);
       }
     } else {
-      // Handle regular command-stream (no database type)
+      // Handle regular command (no database type)
       const commandData: Partial<Command> = {
         name: formData.name,
         content: formData.content,
@@ -133,7 +133,7 @@ export function SQLCommandModal({ sqlCommandId, sqlOrCommandType, isOpen, onClos
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sql">{t('sqlManagement.sql')}</SelectItem>
-                    <SelectItem value="command">{t('sqlManagement.command-stream')}</SelectItem>
+                    <SelectItem value="command">{t('sqlManagement.command')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

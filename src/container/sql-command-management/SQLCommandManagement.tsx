@@ -395,7 +395,7 @@ export default function SQLCommandManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="sql">{t('sqlManagement.sql')}</SelectItem>
-                      <SelectItem value="command">{t('sqlManagement.command-stream')}</SelectItem>
+                      <SelectItem value="command">{t('sqlManagement.command')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>)}
@@ -427,8 +427,8 @@ export default function SQLCommandManagement() {
           <DialogHeader>
             <DialogTitle>
               {importType === 'single' 
-                ? t('sqlManagement.importSingleItem', { 0: exportImportType === 'sql' ? t('sqlManagement.sql') : t('sqlManagement.command-stream') })
-                : t('sqlManagement.importAllItems', { 0: exportImportType === 'sql' ? t('sqlManagement.sql') : t('sqlManagement.command-stream') })
+                ? t('sqlManagement.importSingleItem', { 0: exportImportType === 'sql' ? t('sqlManagement.sql') : t('sqlManagement.command') })
+                : t('sqlManagement.importAllItems', { 0: exportImportType === 'sql' ? t('sqlManagement.sql') : t('sqlManagement.command') })
               }
             </DialogTitle>
           </DialogHeader>
@@ -445,7 +445,7 @@ export default function SQLCommandManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sql">{t('sqlManagement.sql')}</SelectItem>
-                    <SelectItem value="command">{t('sqlManagement.command-stream')}</SelectItem>
+                    <SelectItem value="command">{t('sqlManagement.command')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
