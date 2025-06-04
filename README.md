@@ -1,6 +1,6 @@
 # Database Kit
 
-a database management toolset, built with Electron + React + TypeScript, providing an intuitive graphical interface to manage database connections, execute commands, and edit configuration files.
+一个数据库管理工具集，基于 Electron + React + TypeScript 构建，提供直观的图形界面来管理数据库连接、执行命令和配置文件编辑。
 
 **中文** | [English](./README.en.md)
 
