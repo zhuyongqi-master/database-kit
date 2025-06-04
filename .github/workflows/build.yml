@@ -89,10 +89,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            out/make/**/*.exe
-            out/make/**/*.msi
-            out/make/**/*.zip
-            out/make/**/*.dmg
+            artifacts/windows/**/*
+            artifacts/macos/**/*
           draft: true
           prerelease: false
           generate_release_notes: true
